@@ -1,0 +1,551 @@
+
+<link rel=stylesheet href="static/slider.css">
+
+<style>
+
+#canvas
+{
+	display: block;
+	margin: auto;
+	background-color: #bfc1c4;
+    	position: fixed;
+    	bottom: 0;
+	left: calc(50% - 400px);
+	width: 800px;
+	height: 800px;
+	z-index: 0;
+}
+
+.content
+{
+	position: absolute;
+	width: 300px;
+	top: 20px;
+	right: 20px;
+	z-index: 1;
+}
+
+.curves
+{
+	position: absolute;
+	width: 300px;
+	top: 20px;
+	left: 20px;
+	z-index: 1;
+}
+
+#export, #random
+{
+    background-color: rgba(29, 129, 55, 1);
+    font-size: 16pt;
+    width: 100%;
+    height: 40px;
+    margin: 20px 0 20px 0;
+}
+
+h3 {
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 5px;
+    font-weight: normal;
+}
+
+#decorators {
+    text-align-last: center;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 14pt;
+    //padding: 2px 50px 2px 50px;
+    width: 290px;
+    margin-left: 5px;
+}
+
+</style>
+
+<div class="content">
+<input id="hsegments" type="text" class="slider1" name="value1" text="Dikey kesitler:" min=3 max=100 value="50" onchange="change();">
+<input id="vsegments" type="text" class="slider1" name="value2"  text="Yatay kesitler" min=1 max=100 value="50" onchange="change();">
+<input id="thickness" type="text" class="slider1" name="value3" text="Kalınlık cm:" min=0.2 max=2 round=2 value="0.2" onchange="change();">
+<input id="width" type="text" class="slider1" name="value4" text="Genişlik cm:" min=5 max=250 round=2 value="150" onchange="change();">
+<input id="height" type="text" class="slider1" name="value5" text="Yükseklik cm:" min=5 max=400 round=2 value="200" onchange="change();">
+<input id="bottom" type="text" class="slider1" name="value16" text="Bottom cm:" min=0.0 max=2 round=2 value="0.5" onchange="change();">
+<input id="handle" type="checkbox" onchange="handleCheckbox();" style="margin: 10 10 0 10;-ms-transform: scale(1.5);-moz-transform: scale(1.5);-webkit-transform: scale(1.5);-o-transform: scale(1.5);transform: scale(1.5);">Handle
+<input id="form" type="checkbox" onchange="formCheckbox();" style="margin: 10 10 0 10;-ms-transform: scale(1.5);-moz-transform: scale(1.5);-webkit-transform: scale(1.5);-o-transform: scale(1.5);transform: scale(1.5);">Form
+<input id="double" type="checkbox" onchange="doubleCheckbox();" style="margin: 10 10 0 10;-ms-transform: scale(1.5);-moz-transform: scale(1.5);-webkit-transform: scale(1.5);-o-transform: scale(1.5);transform: scale(1.5);">Double
+<input id="whandle" type="text" class="slider1" name="value25" text="Handle width:" min=0.1 max=2 round=2 value="0.3" onchange="handleWidthFunction();">
+<input id="rform" type="text" class="slider1" name="value26" text="Form radius:" min=0.5 max=8 round=2 value="1.0" onchange="formRadiusFunction();">
+
+<div id="models" style="margin-top: 10px; display: none;">
+  <button id="model1" type="button" onclick="model1();" disabled>1</button>
+  <button id="model2" type="button" onclick="model2();">2</button>
+</div>
+<input id="rmodels" type="text" class="slider1" name="value27" text="Models rotation:" min=0 max=1 round=2 value="0.25" onchange="change();">
+
+<input id="export" type="button" value="Export STL" onclick="upload();exportBinary();" style="margin-bottom: 0;">
+<input id="random" type="button" value="Random" onclick="random();">
+
+<input type="file" onchange="previewFile();"><br>
+<input id="extrusion" type="text" class="slider1" name="value19" text="Extrusion multiplier:" min=0.1 max=10 round=2 value="1" onchange="change();">
+<input id="eheight" type="text" class="slider1" name="value20" text="Pattern height %:" min=10 max=100 round=2 value="100" onchange="change();">
+<input id="eposition" type="text" class="slider1" name="value21" text="Pattern position %:" min=0 max=100 round=2 value="0" onchange="change();">
+<input id="eparts" type="text" class="slider1" name="value22" text="Parts:" min=1 max=6 value="1" onchange="repattern();">
+<!--img src="" height="200"-->
+
+</div>
+
+<div class="curves">
+<input id="twist" type="text" class="slider1" name="value13" text="Twist" min=0 max=1 value="0" round=2 onchange="change();">
+<input id="rwaving" type="text" class="slider1" name="value23" text="Waving" min=0.4 max=6 value="1" round=2 onchange="change();">
+<input id="swaving" type="text" class="slider1" name="value24" text="Waving scale" min=0 max=1 value="0" round=2 onchange="change();">
+<hr>
+
+<input id="A" type="text" class="slider1" name="value6" text="A" min=0 max=1 value="0.34" round=2 onchange="change();">
+<input id="B" type="text" class="slider1" name="value7"  text="B" min=0 max=1 value="0.18" round=2 onchange="change();">
+<input id="C" type="text" class="slider1" name="value8" text="C" min=0 max=1 value="0.22" round=2 onchange="change();">
+<input id="D" type="text" class="slider1" name="value9" text="D" min=0 max=1 value="0.42" round=2 onchange="change();">
+<input id="E" type="text" class="slider1" name="value10" text="E" min=0 max=1 value="0.52" round=2 onchange="change();">
+<input id="F" type="text" class="slider1" name="value17" text="F" min=0 max=1 value="0.42" round=2 onchange="change();">
+<input id="G" type="text" class="slider1" name="value18" text="G" min=0 max=1 value="0.16" round=2 onchange="change();">
+
+<hr>
+
+<h3> Decorators: </h3>
+<select id="decorators" onchange="choose(this);">
+  <option value="shrink">Shrink</option>
+  <option value="cshrink">Circle shrink</option>
+  <option value="tshrink">Triangle shrink</option>
+  <option value="ishrink">Inner shrink</option>
+  <option value="spikes">Spikes</option>
+  <option value="ispikes">Inverse spikes</option>
+  <option value="waves">Waves</option>
+  <option value="corners">Corners</option>
+  <option value="spheres">Spheres</option>
+  <option value="grid">Grid</option>
+  <!--option value="form">Form</option-->
+  <option value="tails">Tails</option>
+  <option value="ttails">Vertical tails</option>
+  <option value="arcs">Arcs</option>
+  <option value="strips">Strips</option>
+  <option value="swell">Swell</option>
+  <option value="ball">Ball</option>
+  <option value="voronoi">Voronoi</option>
+  <option value="knitting">Knitting</option>
+</select>
+<br>
+<br>
+<input id="dparam" type="text" class="slider1" name="value14" text="Shrink arcs" min=1 max=8 value="4" onchange="change();">
+<input id="dscale" type="text" class="slider1" name="value15" text="Shrink scale" min=0 max=0.5 value="0.0" round=2 onchange="change();">
+
+</div>
+
+<canvas id="canvas">
+
+<script>
+
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+</script>
+
+<script src="static/three.min.js"></script>
+<script src="static/OrbitControls.js"></script>
+<script src="static/DragControls.js"></script>
+<script src="static/STLExporter.js"></script>
+<script src="static/OBJLoader.js"></script>
+<script src="static/CSPL.js"></script>
+<script src="static/library4.js"></script>
+<script src="static/export.js"></script>
+<script src="static/marchingsquares.min.js"></script>
+<script src="static/d3-voronoi.min.js"></script>
+
+<script>
+
+decoratorsData = {
+                    'shrink': ['Shrink arcs', 'Shrink scale', [true, 1, 8, 4, 0], [true, 0, 0.5, 0, 2]],
+                    'cshrink': ['Circle arcs', 'Circle scale', [true, 1, 8, 4, 0], [true, 0, 0.5, 0.2, 2]],
+                    'tshrink': ['Triangle arcs', 'Triangle scale', [true, 1, 8, 4, 0], [true, 0, 0.5, 0.2, 2]],
+                    'ishrink': ['Shrink arcs', 'Shrink scale', [true, 1, 8, 4, 0], [true, 0, 0.5, 0.2, 2]],
+                    'spikes': ['Spikes period', 'Spikes scale', [true, 2, 8, 2, 0], [true, 0, 0.3, 0.2, 2]],
+                    'ispikes': ['Spikes period', 'Spikes scale', [true, 2, 8, 2, 0], [true, 0, 0.3, 0.2, 2]],
+                    'waves': ['Waves period', 'Waves scale', [true, 1, 8, 4, 0], [true, 0, 0.5, 0.2, 2]],
+                    'corners': ['Corners count', 'Corners scale', [true, 1, 8, 4, 0], [true, 0.0, 0.8, 0.4, 2]],
+                    'spheres': ['Spheres count', 'Spheres scale', [true, 4, 12, 6, 0], [true, 0.0, 0.4, 0.2, 2]],
+                    'grid': ['', 'Grid scale', [false, 4, 64, 24, 0], [true, 0.01, 0.2, 0.1, 2]],
+                    'form': ['', 'Radius', [false, 4, 64, 24, 0], [true, 0.5, 8, 1, 2]],
+                    'tails': ['Density', 'Extrusion', [true, 6, 24, 12, 0], [true, 0.5, 2, 1, 2]],
+                    'ttails': ['Parts', 'Extrusion', [true, 3, 12, 6, 0], [true, 0.5, 2, 1, 2]],
+                    'arcs': ['Arcs', 'Scale', [true, 0.2, 4, 2, 1], [true, 0.1, 2, 1, 2]],
+                    'strips': ['Period', 'Scale', [true, 2, 24, 8, 0], [true, 0.02, 0.2, 0.1, 2]],
+                    'swell': ['Density', 'Radius', [true, 1, 4, 3, 0], [true, 0.2, 1.2, 0.7, 2]],
+                    'ball': ['Height', 'Radius', [true, 0, 10, 5, 2], [true, 2, 10, 3, 2]],
+                    'voronoi': ['Gap', 'Extrusion', [true, 0.1, 0.5, 0.25, 2], [true, 0.01, 0.5, 0.05, 2]],
+                    'knitting': ['Width', 'Extrusion', [true, 0.05, 1, 0.1, 2], [true, 0.02, 0.25, 0.1, 2]]
+                 };
+
+var edata, eheight;
+
+function previewFile() {
+       //let preview = document.querySelector('img');
+       let file = document.querySelector('input[type=file]').files[0];
+       let reader = new FileReader();
+
+       reader.onloadend = function () {
+           //preview.src = reader.result;
+
+           let image = new Image();
+           image.src = reader.result;
+           image.onload = function() {
+                let canvas = document.createElement('canvas');
+                canvas.width = this.width;
+                canvas.height = this.height;
+                canvas.getContext('2d').drawImage(this, 0, 0, this.width, this.height);
+
+                //console.log(canvas.getContext('2d').getImageData(1, 1, 1, 1).data[0]);
+                //createPattern(canvas);
+                let data = [];
+                let index = 0;
+                if (file.type == 'image/png')
+                    index = 3;
+                for (let i = this.height - 1; i >= 0 ; i--) {
+                    let row = [];
+                    for (let j = 0; j < this.width; j++) {
+                        //let value = canvas.getContext('2d').getImageData(j, i, 1, 1).data[0] < 128 ? 255 : 0;
+                        let value = 255 - canvas.getContext('2d').getImageData(j, i, 1, 1).data[index];
+                        row.push(value);
+                    }
+                    data.push(row);
+                }
+                let width = parseFloat(document.getElementById("width").value);
+                let parts = parseFloat(document.getElementById("eparts").value);
+                edata = data;
+                eheight = this.height;
+                createPattern(data, width, this.height, parts);
+                change();
+           };
+       }
+
+       if (file) {
+           reader.readAsDataURL(file);
+       } /*else {
+           preview.src = "";
+       }*/
+}
+
+function handleCheckbox() {
+    let checkbox = document.getElementById("handle");
+    if (checkbox.checked) {
+        document.getElementById("whandle").parentNode.style.display = "block";
+        activateHandle();
+    }
+    else {
+        document.getElementById("whandle").parentNode.style.display = "none";
+        deactivateHandle();
+    }
+    change();
+}
+
+function formCheckbox() {
+    let checkbox = document.getElementById("form");
+    if (checkbox.checked) {
+        document.getElementById("rform").parentNode.style.display = "block";
+        form = parseFloat(document.getElementById("rform").value);
+    }
+    else {
+        document.getElementById("rform").parentNode.style.display = "none";
+        form = 0;
+    }
+    change();
+}
+
+function doubleCheckbox() {
+    let checkbox = document.getElementById("double");
+    let models = document.getElementById("models");
+    if (checkbox.checked) {
+        models.style.display = "block";
+    }
+    else {
+        models.style.display = "none";
+    }
+    change();
+}
+
+var slidersMemory = [{}, "shrink"];
+
+function saveSliders() {
+    let mem = {};
+    let sliders = document.getElementsByClassName("slider1");
+    for (let i = 0; i < sliders.length; i++) {
+        mem[sliders[i].id] = sliders[i].value;
+    }
+    let decoration = document.getElementById("decorators").value;
+    return [mem, decoration];
+}
+
+function loadSliders(mem) {
+    let sliders = document.getElementsByClassName("slider1");
+    document.getElementById("decorators").value = mem[1];
+    choose(document.getElementById("decorators"));
+    for (let key in mem[0]) {
+        let slider = document.getElementById(key);
+        setSliderTo(slider.name, mem[0][key]);
+    }
+}
+
+function model1() {
+    let model1 = document.getElementById("model1");
+    let model2 = document.getElementById("model2");
+    model1.disabled = true;
+    model2.disabled = false;
+    let mem = saveSliders();
+    loadSliders(slidersMemory);
+    slidersMemory = mem;
+}
+
+function model2() {
+    let model1 = document.getElementById("model1");
+    let model2 = document.getElementById("model2");
+    model1.disabled = false;
+    model2.disabled = true;
+    let mem = saveSliders();
+    loadSliders(slidersMemory);
+    slidersMemory = mem;
+}
+
+function handleWidthFunction() {
+    handleWidth = parseFloat(document.getElementById("whandle").value);
+    change();
+}
+
+function formRadiusFunction() {
+    if(!document.getElementById("form").checked)
+        return;
+    form = parseFloat(document.getElementById("rform").value);
+    change();
+}
+
+function repattern() {
+    let width = parseFloat(document.getElementById("width").value);
+    let parts = parseFloat(document.getElementById("eparts").value);
+    createPattern(edata, width, eheight, parts);
+    change();
+}
+
+function choose(decorators) {
+    let dparam = document.getElementById('dparam').parentNode;
+    let dscale = document.getElementById('dscale').parentNode;
+    let parent = dparam.parentNode;
+
+    dparam.parentNode.removeChild(dparam);
+    dscale.parentNode.removeChild(dscale);
+
+    function updateSlider(id, name, text, visible, min, max, value, round) {
+        let slider = document.createElement('input');
+        slider.id = id;
+        slider.classList.add('slider1');
+        slider.name = name;
+        slider.type = 'text';
+        slider.setAttribute('text', text);
+        slider.min = min;
+        slider.max = max;
+        slider.setAttribute('value', value);
+        slider.setAttribute('round', round);
+        //slider.addEventListener('change', change, false);
+        slider.setAttribute('onchange', 'change();');
+        parent.appendChild(slider);
+        createSlider(slider);
+        if (visible)
+            slider.parentNode.style.display = 'block';
+        else
+            slider.parentNode.style.display = 'none';
+    }
+
+    if (decorators.value == 'voronoi')
+        voronoiFunction();
+
+    data = decoratorsData[decorators.value];
+    updateSlider('dparam', 'slider14', data[0], data[2][0], data[2][1], data[2][2], data[2][3], data[2][4]);
+    updateSlider('dscale', 'slider15', data[1], data[3][0], data[3][1], data[3][2], data[3][3], data[3][4]);
+}
+
+var exporter = new THREE.STLExporter();
+
+function random() {
+    let hsegments = getRandomInt(1, 4);
+    if (hsegments == 1)
+        hsegments = getRandomInt(3, 6);
+    else
+        hsegments = 60;
+
+    let vsegments = 50;
+    let height = getRandomInt(15, 35);
+    let width = getRandomInt(10, 30);
+    let A = 0.2 + Math.random()/1.5;
+    let B = 0.2 + Math.random()/1.5;
+    let C = 0.2 + Math.random()/1.5;
+    let D = 0.2 + Math.random()/1.5;
+    let E = 0.2 + Math.random()/1.5;
+    let F = 0.2 + Math.random()/1.5;
+    let G = 0.2 + Math.random()/1.5;
+
+    let twist = Math.random();
+    if (twist > 0.5)
+        twist = 0;
+
+    setSliderTo("value1", hsegments);
+    setSliderTo("value2", vsegments);
+    setSliderTo("value4", width);
+    setSliderTo("value5", height);
+
+    setSliderTo("value6", A);
+    setSliderTo("value7", B);
+    setSliderTo("value8", C);
+    setSliderTo("value9", D);
+    setSliderTo("value10", E);
+    setSliderTo("value17", F);
+    setSliderTo("value18", G);
+
+    setSliderTo("value13", twist);
+
+    let decorations = [];
+    if (Math.random() > 0.5) {
+        for (let key in decoratorsData)
+        {
+            if (key == "tails" || key == "form")
+                continue;
+            if (Math.random() < 0.2) {
+                let dparam = getRandomInt(decoratorsData[key][2][1], decoratorsData[key][2][2]);
+                let dscale = getRandomArbitrary(decoratorsData[key][3][1], decoratorsData[key][3][2]);
+
+                decorations.push([key, dparam, dscale]);
+            }
+        }
+    }
+
+    change(decorations);
+}
+
+function change(decorations = []) {
+    let hsegments = parseInt(document.getElementById("hsegments").value);
+    let vsegments = parseInt(document.getElementById("vsegments").value);
+    let height = parseFloat(document.getElementById("height").value);
+    let thickness = parseFloat(document.getElementById("thickness").value);
+    let width = parseFloat(document.getElementById("width").value);
+    let A = parseFloat(document.getElementById("A").value);
+    //let A = 0;
+    let B = parseFloat(document.getElementById("B").value);
+    let C = parseFloat(document.getElementById("C").value);
+    let D = parseFloat(document.getElementById("D").value);
+    let E = parseFloat(document.getElementById("E").value);
+    let F = parseFloat(document.getElementById("F").value);
+    let G = parseFloat(document.getElementById("G").value);
+    //let delta = parseFloat(document.getElementById("delta").value);
+    //let translation = parseFloat(document.getElementById("translation").value);
+    let delta = 0, translation = 0;
+    let twist = parseFloat(document.getElementById("twist").value);
+    let bottom = parseFloat(document.getElementById("bottom").value);
+    let extrusion = parseFloat(document.getElementById("extrusion").value);
+    let eheight = parseFloat(document.getElementById("eheight").value);
+    let eposition = parseFloat(document.getElementById("eposition").value);
+
+    let rwaving = parseFloat(document.getElementById("rwaving").value);
+    let swaving = parseFloat(document.getElementById("swaving").value);
+
+    let rmodels = parseFloat(document.getElementById("rmodels").value);
+
+    let double = document.getElementById("double").checked;
+    let model = document.getElementById("model1").disabled ? 1 : 2;
+
+    let decoration = document.getElementById("decorators").value;
+    if (!(document.getElementById("dparam") && document.getElementById("dscale")))
+        return;
+    let dparam = parseFloat(document.getElementById("dparam").value);
+    let dscale = parseFloat(document.getElementById("dscale").value);
+
+    if (decorations.length == 0)
+        decorations = [[decoration, dparam, dscale]];
+    updateVase(hsegments, vsegments, width, height, thickness, A, B, C, D, E, F, G, delta, translation, twist, decorations, bottom, extrusion, eheight, eposition, rwaving, swaving, rmodels, double, model);
+}
+
+function exportASCII() {
+    let height = parseFloat(document.getElementById("height").value);
+    let width = parseFloat(document.getElementById("width").value);
+    var result = exporter.parse( base, { width: width, height: height } );
+    saveString( result, 'vase.stl' );
+}
+
+function exportBinary() {
+	var result = exporter.parse( base, { binary: true } );
+	saveString( result, 'vase.stl' );
+	//saveArrayBuffer( result, 'box.stl' );
+}
+
+var link = document.createElement( 'a' );
+link.style.display = 'none';
+document.body.appendChild( link );
+
+function save( blob, filename ) {
+    link.href = URL.createObjectURL( blob );
+	link.download = filename;
+	link.click();
+}
+
+function saveString( text, filename ) {
+	save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+}
+
+function upload() {
+    if (handle) {
+        scene.remove(handle1);
+        scene.remove(handle2);
+        scene.remove(handle3);
+    }
+
+    var xhr = new XMLHttpRequest();
+    var fd = new FormData();
+    xhr.open("POST", "/save.php", true);
+
+    /*xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            window.location.href = this.responseText;
+       }
+    };*/
+
+    let height = parseFloat(document.getElementById("height").value);
+    let width = parseFloat(document.getElementById("width").value);
+    var stl = exporter.parse( base, { binary: true } );
+
+    var blob = new Blob( [stl], { type: 'text/plain' } );
+
+    var reader = new FileReader();
+    reader.onload = function() {
+        fd.append("stl", reader.result);
+        xhr.send(fd);
+    }
+
+    renderer.render(scene, camera);
+    var screenshot = trim(canvas, renderer).toDataURL("image/png");
+    fd.append("screenshot", screenshot);
+
+    reader.readAsDataURL(blob);
+
+    if (handle) {
+        scene.add(handle1);
+        scene.add(handle2);
+        scene.add(handle3);
+    }
+}
+
+</script>
+
+<script type="text/javascript" src="static/CreateSuperElement.js"></script>
+<script type="text/javascript" src="static/sliders.js"></script>
+
+<script>
+    document.getElementById("whandle").parentNode.style.display = "none";
+    document.getElementById("rform").parentNode.style.display = "none";
+</script>
